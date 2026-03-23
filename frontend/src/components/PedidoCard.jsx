@@ -4,42 +4,60 @@ import { atualizarStatus, eliminarPedido } from "../services/api";
 function PedidoCard({ pedido, onUpdate }) {
 
   const handleStatus = async (status) => {
+    const confirmacion = window.confirm("¿Seguro que deseas cambiar el estado?");
+    if (!confirmacion) return;
+
     await atualizarStatus(pedido.numero, status);
+    alert("✅ Estado actualizado");
+
     if (onUpdate) onUpdate();
   };
 
   const handleDelete = async () => {
-    console.log("🗑 Eliminando pedido:", pedido.numero);
+    const confirmacion = window.confirm("¿Eliminar este pedido?");
+    if (!confirmacion) return;
 
     await eliminarPedido(pedido.numero);
+    alert("🗑 Pedido eliminado");
 
-    // 🔥 FORZAR REFRESH
-    setTimeout(() => {
-      if (onUpdate) onUpdate();
-    }, 500);
+    if (onUpdate) onUpdate();
   };
 
-  return (
-    <div className="card">
+  const statusClass = (pedido.status || "").toLowerCase();
 
-      <div className="card-top">
-        <strong>#{pedido.numero}</strong>
+  return (
+    <div className={`card ${statusClass}`}>
+
+      {/* HEADER CARD */}
+      <div className="card-header">
+        <span>Pedido #{pedido.numero}</span>
 
         <button className="trash-btn" onClick={handleDelete}>
-          🗑
+          🗑️
         </button>
       </div>
 
-      <p><strong>{pedido.cliente || "-"}</strong></p>
-      <p>{pedido.descricao || "-"}</p>
-      <p>{pedido.endereco || "-"}</p>
+      {/* BODY */}
+      <div className="card-body">
 
-      {pedido.comentario && (
-        <p>{pedido.comentario}</p>
-      )}
+        <p className="cliente">{pedido.cliente}</p>
 
-      <p><strong>{pedido.status}</strong></p>
+        <p className="descripcion">{pedido.descricao}</p>
 
+        <p className="direccion">{pedido.endereco}</p>
+
+        {pedido.comentario && (
+          <p className="comentario">📝 {pedido.comentario}</p>
+        )}
+
+      </div>
+
+      {/* STATUS VISUAL */}
+      <div className={`status-badge ${statusClass}`}>
+        {pedido.status}
+      </div>
+
+      {/* BOTONES */}
       <div className="actions">
         <button className="btn preparar" onClick={() => handleStatus("preparando")}>
           Preparar

@@ -4,24 +4,16 @@ import { getPedidos } from "../services/api";
 
 function Cozinha() {
   const [pedidos, setPedidos] = useState([]);
-  const [hora, setHora] = useState("");
+  const [filtro, setFiltro] = useState("todos");
 
   const fetchData = async () => {
-    try {
-      const data = await getPedidos();
+    const data = await getPedidos();
 
-      if (Array.isArray(data)) {
-        // 🔥 FILTRAR ELIMINADOS
-        const visibles = data.filter(p => String(p.eliminado).toLowerCase() !== "true");
-        setPedidos(visibles);
-      } else {
-        setPedidos([]);
-      }
+    const visibles = (data || []).filter(
+      (p) => String(p.eliminado).toLowerCase() !== "true"
+    );
 
-    } catch (error) {
-      console.error("Error fetch:", error);
-      setPedidos([]);
-    }
+    setPedidos(visibles);
   };
 
   useEffect(() => {
@@ -30,80 +22,62 @@ function Cozinha() {
     return () => clearInterval(interval);
   }, []);
 
-  // ⏰ HORA EN VIVO
-  useEffect(() => {
-    const intervalHora = setInterval(() => {
-      setHora(new Date().toLocaleTimeString());
-    }, 1000);
-    return () => clearInterval(intervalHora);
-  }, []);
-
   const normalizar = (s) => (s || "").toLowerCase().trim();
 
-  const nuevos = pedidos.filter(
-    (p) => normalizar(p.status) === "novo" || normalizar(p.status) === "nuevo"
-  );
+  const aplicarFiltro = (lista, estado) => {
+    if (filtro === "todos") return lista;
+    if (filtro === estado) return lista;
+    return [];
+  };
 
-  const preparando = pedidos.filter(
-    (p) => normalizar(p.status) === "preparando"
-  );
-
-  const listos = pedidos.filter(
-    (p) => normalizar(p.status) === "listo"
-  );
-
-  const cancelados = pedidos.filter(
-    (p) => normalizar(p.status) === "cancelado"
-  );
+  const nuevos = pedidos.filter(p => normalizar(p.status) === "novo");
+  const preparando = pedidos.filter(p => normalizar(p.status) === "preparando");
+  const listos = pedidos.filter(p => normalizar(p.status) === "listo");
+  const cancelados = pedidos.filter(p => normalizar(p.status) === "cancelado");
 
   return (
-    <div className="cozinha-container">
-
-      {/* HEADER */}
-      <div className="header">
-        <div className="header-content">
-          <h1>🍔 Cocina</h1>
-          <div className="header-info">
-            <span>🕒 {hora}</span>
-            <span>📦 {pedidos.length}</span>
-          </div>
-        </div>
+    <>
+      {/* 🔥 FILTROS */}
+      <div className="filtros">
+        <button onClick={() => setFiltro("todos")}>Todos</button>
+        <button onClick={() => setFiltro("novo")}>Nuevos</button>
+        <button onClick={() => setFiltro("preparando")}>Preparando</button>
+        <button onClick={() => setFiltro("listo")}>Listos</button>
+        <button onClick={() => setFiltro("cancelado")}>Cancelados</button>
       </div>
 
-      {/* KANBAN */}
       <div className="kanban">
 
         <div className="column">
           <h2 className="col-title nuevos">🟡 Nuevos</h2>
-          {nuevos.map((p) => (
+          {aplicarFiltro(nuevos, "novo").map(p => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
           ))}
         </div>
 
         <div className="column">
           <h2 className="col-title preparando">🟠 Preparando</h2>
-          {preparando.map((p) => (
+          {aplicarFiltro(preparando, "preparando").map(p => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
           ))}
         </div>
 
         <div className="column">
           <h2 className="col-title listos">🟢 Listos</h2>
-          {listos.map((p) => (
+          {aplicarFiltro(listos, "listo").map(p => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
           ))}
         </div>
 
         <div className="column">
           <h2 className="col-title cancelados">🔴 Cancelados</h2>
-          {cancelados.map((p) => (
+          {aplicarFiltro(cancelados, "cancelado").map(p => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
           ))}
         </div>
 
       </div>
-
-    </div>
+    </>
   );
 }
 
