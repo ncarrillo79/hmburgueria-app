@@ -5,112 +5,132 @@ body {
   color: #ffffff;
 }
 
-/* CONTENEDOR */
-.cozinha-container {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
 /* HEADER */
 .header {
   background: #020617;
-  padding: 14px 20px;
+  padding: 12px 20px;
   border-bottom: 2px solid #1e293b;
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 22px;
-  color: #f8fafc;
-}
-
-.header-info {
+/* KANBAN */
+.kanban {
   display: flex;
   gap: 16px;
-  font-size: 14px;
-  color: #94a3b8;
+  padding: 16px;
+  height: calc(100vh - 60px);
+  overflow-x: auto;
 }
 
-/* SECCIONES */
-.section {
-  padding: 20px;
+/* COLUMNAS */
+.column {
+  min-width: 280px;
+  max-width: 320px;
+  background: #1e293b;
+  border-radius: 10px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  position: relative;
 }
 
-.section-title {
-  margin-bottom: 10px;
+/* 🔥 TITULOS FIJOS */
+.col-title {
+  position: sticky;
+  top: 0;
+  background: #1e293b;
+  padding: 10px;
+  margin: 0;
+  z-index: 10;
+  text-align: center;
+  border-bottom: 1px solid #334155;
 }
 
-.section-title.nuevos {
-  color: #facc15;
-}
-
-.section-title.preparando {
-  color: #fb923c;
-}
-
-.section-title.listos {
-  color: #4ade80;
-}
-
-.section-title.cancelados {
-  color: #f87171;
-}
-
-.empty {
-  color: #9ca3af;
-}
+.col-title.nuevos { color: #facc15; }
+.col-title.preparando { color: #fb923c; }
+.col-title.listos { color: #4ade80; }
+.col-title.cancelados { color: #f87171; }
 
 /* TARJETAS */
 .card {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  border-left: 6px solid #6b7280;
+  background: #111827;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px;
+  font-size: 13px;
 }
 
-.card.novo {
-  border-left-color: #facc15;
-}
-
-.card.preparando {
-  border-left-color: #fb923c;
-}
-
-.card.listo {
-  border-left-color: #4ade80;
-}
-
-.card.cancelado {
-  border-left-color: #f87171;
+/* HEADER CARD */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 
 /* PAPELERA */
 .trash-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: #111827;
-  border: 1px solid #374151;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: transparent;
+  border: none;
   cursor: pointer;
-}
-
-.trash-icon {
-  font-size: 16px;
-  color: #e5e7eb;
+  color: #94a3b8;
 }
 
 .trash-btn:hover {
-  background: #7f1d1d;
-  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* STATUS */
+.status {
+  margin-top: 6px;
+  font-weight: bold;
+}
+
+/* BOTONES BONITOS */
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.btn {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  color: white;
+}
+
+.preparar {
+  background: #f59e0b;
+}
+
+.listo {
+  background: #22c55e;
+}
+
+.cancelar {
+  background: #ef4444;
+}
+
+/* SCROLL */
+.column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.column::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 10px;
+}
+
+/* 📱 RESPONSIVE */
+@media (max-width: 900px) {
+  .kanban {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .column {
+    max-width: 100%;
+    width: 100%;
+  }
 }
