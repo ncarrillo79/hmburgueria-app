@@ -1,0 +1,7 @@
+1. Cliente pide por WhatsApp
+2. Pedido llega a Google Sheets
+3. Backend detecta nuevo pedido
+4. Backend imprime ticket automáticamente 🖨️
+5. Frontend lo muestra en cocina
+6. Cocina cambia estado
+7. Backend actualiza Google Sheets
