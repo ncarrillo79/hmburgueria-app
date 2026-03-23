@@ -9,8 +9,15 @@ function Cozinha() {
   const fetchData = async () => {
     try {
       const data = await getPedidos();
-      if (Array.isArray(data)) setPedidos(data);
-      else setPedidos([]);
+
+      if (Array.isArray(data)) {
+        // 🔥 FILTRAR ELIMINADOS
+        const visibles = data.filter(p => String(p.eliminado).toLowerCase() !== "true");
+        setPedidos(visibles);
+      } else {
+        setPedidos([]);
+      }
+
     } catch (error) {
       console.error("Error fetch:", error);
       setPedidos([]);
@@ -23,6 +30,7 @@ function Cozinha() {
     return () => clearInterval(interval);
   }, []);
 
+  // ⏰ HORA EN VIVO
   useEffect(() => {
     const intervalHora = setInterval(() => {
       setHora(new Date().toLocaleTimeString());
@@ -62,7 +70,7 @@ function Cozinha() {
         </div>
       </div>
 
-      {/* TABLERO KANBAN */}
+      {/* KANBAN */}
       <div className="kanban">
 
         <div className="column">
@@ -94,6 +102,7 @@ function Cozinha() {
         </div>
 
       </div>
+
     </div>
   );
 }

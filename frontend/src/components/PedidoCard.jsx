@@ -4,24 +4,19 @@ import { atualizarStatus, eliminarPedido } from "../services/api";
 function PedidoCard({ pedido, onUpdate }) {
 
   const handleStatus = async (status) => {
-    try {
-      await atualizarStatus(pedido.numero, status);
-      if (onUpdate) onUpdate();
-    } catch (error) {
-      console.error(error);
-    }
+    await atualizarStatus(pedido.numero, status);
+    if (onUpdate) onUpdate();
   };
 
   const handleDelete = async () => {
-    try {
-      await eliminarPedido(pedido.numero);
+    console.log("🗑 Eliminando pedido:", pedido.numero);
 
-      // 🔥 IMPORTANTE: refrescar datos
+    await eliminarPedido(pedido.numero);
+
+    // 🔥 FORZAR REFRESH
+    setTimeout(() => {
       if (onUpdate) onUpdate();
-
-    } catch (error) {
-      console.error(error);
-    }
+    }, 500);
   };
 
   return (
@@ -40,10 +35,10 @@ function PedidoCard({ pedido, onUpdate }) {
       <p>{pedido.endereco || "-"}</p>
 
       {pedido.comentario && (
-        <p className="coment">{pedido.comentario}</p>
+        <p>{pedido.comentario}</p>
       )}
 
-      <div className="status">{pedido.status}</div>
+      <p><strong>{pedido.status}</strong></p>
 
       <div className="actions">
         <button className="btn preparar" onClick={() => handleStatus("preparando")}>

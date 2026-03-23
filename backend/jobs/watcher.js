@@ -6,7 +6,6 @@ import axios from "axios";
 import { imprimirPedido } from "../services/printer.js";
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3AsfDAP0lMxBu-NzzEOgx50xp2OZL5TFlz5dvWvcBl_h9sVxadJd68e5NOWAwBdBByQ/exec";
-
 let pedidosYaImpresos = new Set();
 
 export async function revisarPedidos() {

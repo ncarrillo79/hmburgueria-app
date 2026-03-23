@@ -1,16 +1,16 @@
-const BASE_URL = "http://localhost:3001";
+const API_URL = "http://localhost:3001";
 
-// 🔹 GET pedidos
-export async function getPedidos() {
-  const res = await fetch(`${BASE_URL}/pedidos`);
-  return await res.json();
-}
+// 📥 OBTENER PEDIDOS
+export const getPedidos = async () => {
+  const res = await fetch(`${API_URL}/pedidos`);
+  const data = await res.json();
 
-// 🔹 ACTUALIZAR STATUS
-export async function atualizarStatus(numero, status) {
-  console.log("Enviando status:", numero, status);
+  return data;
+};
 
-  const res = await fetch(`${BASE_URL}/status`, {
+// 🔄 ACTUALIZAR STATUS
+export const atualizarStatus = async (numero, status) => {
+  await fetch(`${API_URL}/status`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -20,24 +20,18 @@ export async function atualizarStatus(numero, status) {
       status
     })
   });
+};
 
-  const data = await res.json();
-  console.log("Respuesta:", data);
-
-  return data;
-}
-
-// 🔹 ELIMINAR
-export async function eliminarPedido(numero) {
-  const res = await fetch(`${BASE_URL}/delete`, {
+// 🗑 ELIMINAR (SOFT DELETE)
+export const eliminarPedido = async (numero) => {
+  await fetch(`${API_URL}/status`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      numero
+      numero,
+      eliminar: true
     })
   });
-
-  return await res.json();
-}
+};
