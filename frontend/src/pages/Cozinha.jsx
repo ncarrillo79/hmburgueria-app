@@ -9,12 +9,8 @@ function Cozinha() {
   const fetchData = async () => {
     try {
       const data = await getPedidos();
-
-      if (Array.isArray(data)) {
-        setPedidos(data);
-      } else {
-        setPedidos([]);
-      }
+      if (Array.isArray(data)) setPedidos(data);
+      else setPedidos([]);
     } catch (error) {
       console.error("Error fetch:", error);
       setPedidos([]);
@@ -27,13 +23,10 @@ function Cozinha() {
     return () => clearInterval(interval);
   }, []);
 
-  // ⏰ HORA EN VIVO
   useEffect(() => {
     const intervalHora = setInterval(() => {
-      const ahora = new Date();
-      setHora(ahora.toLocaleTimeString());
+      setHora(new Date().toLocaleTimeString());
     }, 1000);
-
     return () => clearInterval(intervalHora);
   }, []);
 
@@ -61,63 +54,46 @@ function Cozinha() {
       {/* HEADER */}
       <div className="header">
         <div className="header-content">
-          <h1>🍔 Sistema de Cocina</h1>
-
+          <h1>🍔 Cocina</h1>
           <div className="header-info">
             <span>🕒 {hora}</span>
-            <span>📦 {pedidos.length} pedidos</span>
+            <span>📦 {pedidos.length}</span>
           </div>
         </div>
       </div>
 
-      {/* NUEVOS */}
-      <div className="section">
-        <h2 className="section-title nuevos">🟡 Nuevos</h2>
-        {nuevos.length === 0 ? (
-          <p className="empty">Sin pedidos nuevos</p>
-        ) : (
-          nuevos.map((p) => (
-            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))
-        )}
-      </div>
+      {/* TABLERO KANBAN */}
+      <div className="kanban">
 
-      {/* PREPARANDO */}
-      <div className="section">
-        <h2 className="section-title preparando">🟠 Preparando</h2>
-        {preparando.length === 0 ? (
-          <p className="empty">Sin pedidos en preparación</p>
-        ) : (
-          preparando.map((p) => (
+        <div className="column">
+          <h2 className="col-title nuevos">🟡 Nuevos</h2>
+          {nuevos.map((p) => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
 
-      {/* LISTOS */}
-      <div className="section">
-        <h2 className="section-title listos">🟢 Listos</h2>
-        {listos.length === 0 ? (
-          <p className="empty">Sin pedidos listos</p>
-        ) : (
-          listos.map((p) => (
+        <div className="column">
+          <h2 className="col-title preparando">🟠 Preparando</h2>
+          {preparando.map((p) => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
 
-      {/* CANCELADOS */}
-      <div className="section">
-        <h2 className="section-title cancelados">🔴 Cancelados</h2>
-        {cancelados.length === 0 ? (
-          <p className="empty">Sin pedidos cancelados</p>
-        ) : (
-          cancelados.map((p) => (
+        <div className="column">
+          <h2 className="col-title listos">🟢 Listos</h2>
+          {listos.map((p) => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
 
+        <div className="column">
+          <h2 className="col-title cancelados">🔴 Cancelados</h2>
+          {cancelados.map((p) => (
+            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
+          ))}
+        </div>
+
+      </div>
     </div>
   );
 }
