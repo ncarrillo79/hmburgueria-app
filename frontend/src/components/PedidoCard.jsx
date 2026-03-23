@@ -37,47 +37,76 @@ function PedidoCard({ pedido, onUpdate }) {
     }
   };
 
-  const getStatusColor = () => {
+  const getStatusClass = () => {
     const s = (pedido.status || "").toLowerCase();
 
-    if (s === "novo" || s === "nuevo") return "#facc15";
-    if (s === "preparando") return "#fb923c";
-    if (s === "listo") return "#4ade80";
-    if (s === "cancelado") return "#f87171";
+    if (s === "novo" || s === "nuevo") return "novo";
+    if (s === "preparando") return "preparando";
+    if (s === "listo") return "listo";
+    if (s === "cancelado") return "cancelado";
 
-    return "#999";
+    return "";
   };
 
   return (
-    <div className="card" style={{ borderLeft: `6px solid ${getStatusColor()}` }}>
-      <h3>Pedido #{pedido.numero}</h3>
+    <div className={`card ${getStatusClass()}`}>
+      <div className="card-top">
+        <div className="pedido-id">Pedido #{pedido.numero}</div>
 
-      <p><strong>Cliente:</strong> {pedido.cliente || "-"}</p>
-      <p><strong>Descrição:</strong> {pedido.descricao || "-"}</p>
-      <p><strong>Endereço:</strong> {pedido.endereco || "-"}</p>
+        <button
+          className="trash-btn"
+          onClick={handleDelete}
+          title="Eliminar pedido"
+          aria-label="Eliminar pedido"
+        >
+          <span className="trash-icon">🗑</span>
+        </button>
+      </div>
 
-      {pedido.comentario && (
-        <p><strong>Observações:</strong> {pedido.comentario}</p>
-      )}
+      <div className="card-content">
+        <p><strong>Cliente:</strong> {pedido.cliente || "-"}</p>
+        <p><strong>Descrição:</strong> {pedido.descricao || "-"}</p>
+        <p><strong>Endereço:</strong> {pedido.endereco || "-"}</p>
 
-      <p>
-        <strong>Status:</strong>{" "}
-        <span style={{ color: getStatusColor(), fontWeight: "bold" }}>
-          {pedido.status || "Novo"}
-        </span>
-      </p>
+        {pedido.comentario && (
+          <p><strong>Observações:</strong> {pedido.comentario}</p>
+        )}
 
-      {pedido.data && pedido.hora && (
-        <p><strong>Recebido:</strong> {pedido.data} às {pedido.hora}</p>
-      )}
+        <p>
+          <strong>Status:</strong>{" "}
+          <span className={`status-badge ${getStatusClass()}`}>
+            {pedido.status || "Novo"}
+          </span>
+        </p>
 
-      <p><strong>Tiempo:</strong> {calcularTiempo(pedido.hora, pedido.data)}</p>
+        {pedido.data && pedido.hora && (
+          <p><strong>Recebido:</strong> {pedido.data} às {pedido.hora}</p>
+        )}
 
-      <div className="buttons">
-        <button onClick={() => handleStatus("preparando")}>Preparar</button>
-        <button onClick={() => handleStatus("listo")}>Listo</button>
-        <button onClick={() => handleStatus("cancelado")}>Cancelar</button>
-        <button onClick={handleDelete}>Eliminar</button>
+        <p><strong>Tiempo:</strong> {calcularTiempo(pedido.hora, pedido.data)}</p>
+      </div>
+
+      <div className="actions">
+        <button
+          className="btn preparar"
+          onClick={() => handleStatus("preparando")}
+        >
+          Preparar
+        </button>
+
+        <button
+          className="btn listo"
+          onClick={() => handleStatus("listo")}
+        >
+          Listo
+        </button>
+
+        <button
+          className="btn cancelar"
+          onClick={() => handleStatus("cancelado")}
+        >
+          Cancelar
+        </button>
       </div>
     </div>
   );
