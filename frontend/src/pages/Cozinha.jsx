@@ -1,19 +1,33 @@
 import React, { useEffect, useState } from "react";
 import PedidoCard from "../components/PedidoCard";
 import { getPedidos } from "../services/api";
+import sonido from "../assets/notify.mp3";
 
 function Cozinha() {
   const [pedidos, setPedidos] = useState([]);
   const [filtro, setFiltro] = useState("todos");
+  const [ultimoTotal, setUltimoTotal] = useState(0);
 
   const fetchData = async () => {
-    const data = await getPedidos();
+    try {
+      const data = await getPedidos();
 
-    const visibles = (data || []).filter(
-      (p) => String(p.eliminado).toLowerCase() !== "true"
-    );
+      const visibles = (data || []).filter(
+        (p) => String(p.eliminado).toLowerCase() !== "true"
+      );
 
-    setPedidos(visibles);
+      // 🔔 sonido si llega nuevo pedido
+      if (visibles.length > ultimoTotal) {
+        const audio = new Audio(sonido);
+        audio.play().catch(() => {});
+      }
+
+      setUltimoTotal(visibles.length);
+      setPedidos(visibles);
+
+    } catch (error) {
+      console.error("Error fetch:", error);
+    }
   };
 
   useEffect(() => {
@@ -37,7 +51,7 @@ function Cozinha() {
 
   return (
     <>
-      {/* 🔥 FILTROS */}
+      {/* FILTROS */}
       <div className="filtros">
         <button onClick={() => setFiltro("todos")}>Todos</button>
         <button onClick={() => setFiltro("novo")}>Nuevos</button>
@@ -46,6 +60,7 @@ function Cozinha() {
         <button onClick={() => setFiltro("cancelado")}>Cancelados</button>
       </div>
 
+      {/* KANBAN */}
       <div className="kanban">
 
         <div className="column">
