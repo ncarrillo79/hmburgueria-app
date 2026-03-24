@@ -5,6 +5,32 @@ body {
   color: #ffffff;
 }
 
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #020617;
+  border-bottom: 2px solid #1e293b;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+/* BOTÓN FULLSCREEN */
+.fullscreen-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 /* FILTROS */
 .filtros {
   display: flex;
@@ -52,7 +78,7 @@ body {
   font-weight: bold;
 }
 
-/* 🔥 CARD FIX REAL */
+/* CARD */
 .card {
   background: #0f172a;
   border-radius: 12px;
@@ -76,7 +102,7 @@ body {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.6);
 }
 
-/* HEADER */
+/* HEADER CARD */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -85,15 +111,7 @@ body {
 
 /* BODY */
 .card-body {
-  flex-grow: 1; /* 🔥 empuja botones abajo */
-}
-
-/* PAPELERA */
-.trash-btn {
-  font-size: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  flex-grow: 1;
 }
 
 /* TEXTO */
@@ -123,6 +141,11 @@ body {
   margin-top: 8px;
 }
 
+.status-badge.novo { background: #facc15; color: black; }
+.status-badge.preparando { background: #fb923c; }
+.status-badge.listo { background: #22c55e; }
+.status-badge.cancelado { background: #ef4444; }
+
 /* BOTONES */
 .actions {
   display: flex;
@@ -141,13 +164,35 @@ body {
   color: white;
 }
 
-/* COLORES */
 .preparar { background: #f59e0b; }
 .listo-btn { background: #15803d; }
 .cancelar { background: #dc2626; }
 
+/* PAPELERA */
+.trash-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* FULLSCREEN */
+.fullscreen .kanban {
+  height: calc(100vh - 60px);
+}
+
+.fullscreen .column {
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.fullscreen .card {
+  font-size: 15px;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
+
   .kanban {
     flex-direction: column;
     height: auto;
@@ -164,35 +209,13 @@ body {
   }
 }
 
-/* 🔥 RESPONSIVE */
-@media (max-width: 900px) {
+/* ✨ NUEVO PEDIDO */
+.nuevo-highlight {
+  animation: flash 1s ease-in-out 3;
+}
 
-  .kanban {
-    flex-direction: column; /* 🔥 cambia layout */
-    height: auto;
-    overflow-x: hidden;
-  }
-
-  .column {
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
-  }
-
-  .card {
-    height: auto; /* 🔥 cards flexibles */
-    min-height: 220px;
-  }
-
-  .actions {
-    flex-direction: column; /* botones en vertical */
-  }
-
-  .btn {
-    width: 100%;
-  }
-
-  .filtros {
-    justify-content: center;
-  }
+@keyframes flash {
+  0% { background: #facc15; }
+  50% { background: #0f172a; }
+  100% { background: #facc15; }
 }

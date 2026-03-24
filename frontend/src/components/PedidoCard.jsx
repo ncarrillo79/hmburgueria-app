@@ -1,22 +1,73 @@
 import React from "react";
+import toast from "react-hot-toast";
 import { atualizarStatus, eliminarPedido } from "../services/api";
 
-function PedidoCard({ pedido, onUpdate }) {
+function PedidoCard({ pedido, onUpdate, isNew }) {
 
-  const handleStatus = async (status) => {
-    const confirmacion = window.confirm("¿Cambiar estado del pedido?");
-    if (!confirmacion) return;
+  const handleStatus = (status) => {
+    toast((t) => (
+      <div>
+        <p>¿Cambiar estado del pedido?</p>
 
-    await atualizarStatus(pedido.numero, status);
-    if (onUpdate) onUpdate();
+        <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+          <button
+            style={{ padding: "6px", cursor: "pointer" }}
+            onClick={async () => {
+              try {
+                await atualizarStatus(pedido.numero, status);
+                toast.dismiss(t.id);
+                toast.success("Estado actualizado");
+                onUpdate && onUpdate();
+              } catch (error) {
+                toast.error("Error al actualizar");
+              }
+            }}
+          >
+            Sí
+          </button>
+
+          <button
+            style={{ padding: "6px", cursor: "pointer" }}
+            onClick={() => toast.dismiss(t.id)}
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ));
   };
 
-  const handleDelete = async () => {
-    const confirmacion = window.confirm("¿Eliminar pedido?");
-    if (!confirmacion) return;
+  const handleDelete = () => {
+    toast((t) => (
+      <div>
+        <p>¿Eliminar pedido?</p>
 
-    await eliminarPedido(pedido.numero);
-    if (onUpdate) onUpdate();
+        <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+          <button
+            style={{ padding: "6px", cursor: "pointer" }}
+            onClick={async () => {
+              try {
+                await eliminarPedido(pedido.numero);
+                toast.dismiss(t.id);
+                toast.success("Pedido eliminado");
+                onUpdate && onUpdate();
+              } catch (error) {
+                toast.error("Error al eliminar");
+              }
+            }}
+          >
+            Sí
+          </button>
+
+          <button
+            style={{ padding: "6px", cursor: "pointer" }}
+            onClick={() => toast.dismiss(t.id)}
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ));
   };
 
   const calcularTiempo = () => {
@@ -35,12 +86,12 @@ function PedidoCard({ pedido, onUpdate }) {
   const statusClass = (pedido.status || "").toLowerCase();
 
   return (
-    <div className={`card ${statusClass} ${esUrgente ? "urgente" : ""}`}>
+    <div className={`card ${statusClass} ${esUrgente ? "urgente" : ""} ${isNew ? "nuevo-highlight" : ""}`}>
 
       <div className="card-header">
         <span>Pedido #{pedido.numero}</span>
 
-        <button className="trash-btn" onClick={handleDelete}>
+        <button className="trash-btn" onClick={handleDelete} title="Eliminar">
           🗑️
         </button>
       </div>
@@ -63,7 +114,6 @@ function PedidoCard({ pedido, onUpdate }) {
         {pedido.status}
       </div>
 
-      {/* 🔥 CONTENEDOR BOTONES CORREGIDO */}
       <div className="actions">
         <button className="btn preparar" onClick={() => handleStatus("preparando")}>
           Preparar

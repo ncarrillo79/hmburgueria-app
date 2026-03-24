@@ -1,12 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PedidoCard from "../components/PedidoCard";
 import { getPedidos } from "../services/api";
-import sonido from "../assets/notify.mp3";
 
 function Cozinha() {
   const [pedidos, setPedidos] = useState([]);
-  const [filtro, setFiltro] = useState("todos");
-  const [ultimoTotal, setUltimoTotal] = useState(0);
+
+  // 🔥 useRef → SIEMPRE actualizado
+  const idsPreviosRef = useRef([]);
+
+  const audioRef = useRef(null);
+
+  // 🔓 desbloquear audio con interacción
+  useEffect(() => {
+    audioRef.current = new Audio("/notify.mp3");
+
+    const unlockAudio = () => {
+      audioRef.current.play().then(() => {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }).catch(() => {});
+
+      window.removeEventListener("click", unlockAudio);
+    };
+
+    window.addEventListener("click", unlockAudio);
+
+    return () => window.removeEventListener("click", unlockAudio);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -16,13 +36,23 @@ function Cozinha() {
         (p) => String(p.eliminado).toLowerCase() !== "true"
       );
 
-      // 🔔 sonido si llega nuevo pedido
-      if (visibles.length > ultimoTotal) {
-        const audio = new Audio(sonido);
-        audio.play().catch(() => {});
+      const idsActuales = visibles.map(p => p.numero);
+
+      const nuevos = idsActuales.filter(
+        id => !idsPreviosRef.current.includes(id)
+      );
+
+      // 🔔 SOLO SI HAY NUEVOS
+      if (nuevos.length > 0 && idsPreviosRef.current.length > 0) {
+        console.log("🔔 NUEVO PEDIDO:", nuevos);
+
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
       }
 
-      setUltimoTotal(visibles.length);
+      // 🔥 actualizar ref correctamente
+      idsPreviosRef.current = idsActuales;
+
       setPedidos(visibles);
 
     } catch (error) {
@@ -38,61 +68,46 @@ function Cozinha() {
 
   const normalizar = (s) => (s || "").toLowerCase().trim();
 
-  const aplicarFiltro = (lista, estado) => {
-    if (filtro === "todos") return lista;
-    if (filtro === estado) return lista;
-    return [];
-  };
-
-  const nuevos = pedidos.filter(p => normalizar(p.status) === "novo");
-  const preparando = pedidos.filter(p => normalizar(p.status) === "preparando");
-  const listos = pedidos.filter(p => normalizar(p.status) === "listo");
-  const cancelados = pedidos.filter(p => normalizar(p.status) === "cancelado");
-
   return (
-    <>
-      {/* FILTROS */}
-      <div className="filtros">
-        <button onClick={() => setFiltro("todos")}>Todos</button>
-        <button onClick={() => setFiltro("novo")}>Nuevos</button>
-        <button onClick={() => setFiltro("preparando")}>Preparando</button>
-        <button onClick={() => setFiltro("listo")}>Listos</button>
-        <button onClick={() => setFiltro("cancelado")}>Cancelados</button>
+    <div className="kanban">
+
+      <div className="column">
+        <h2 className="col-title">🟡 Nuevos</h2>
+        {pedidos
+          .filter(p => normalizar(p.status) === "novo")
+          .map(p => (
+            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
+          ))}
       </div>
 
-      {/* KANBAN */}
-      <div className="kanban">
-
-        <div className="column">
-          <h2 className="col-title nuevos">🟡 Nuevos</h2>
-          {aplicarFiltro(nuevos, "novo").map(p => (
+      <div className="column">
+        <h2 className="col-title">🟠 Preparando</h2>
+        {pedidos
+          .filter(p => normalizar(p.status) === "preparando")
+          .map(p => (
             <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
           ))}
-        </div>
-
-        <div className="column">
-          <h2 className="col-title preparando">🟠 Preparando</h2>
-          {aplicarFiltro(preparando, "preparando").map(p => (
-            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))}
-        </div>
-
-        <div className="column">
-          <h2 className="col-title listos">🟢 Listos</h2>
-          {aplicarFiltro(listos, "listo").map(p => (
-            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))}
-        </div>
-
-        <div className="column">
-          <h2 className="col-title cancelados">🔴 Cancelados</h2>
-          {aplicarFiltro(cancelados, "cancelado").map(p => (
-            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
-          ))}
-        </div>
-
       </div>
-    </>
+
+      <div className="column">
+        <h2 className="col-title">🟢 Listos</h2>
+        {pedidos
+          .filter(p => normalizar(p.status) === "listo")
+          .map(p => (
+            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
+          ))}
+      </div>
+
+      <div className="column">
+        <h2 className="col-title">🔴 Cancelados</h2>
+        {pedidos
+          .filter(p => normalizar(p.status) === "cancelado")
+          .map(p => (
+            <PedidoCard key={p.numero} pedido={p} onUpdate={fetchData} />
+          ))}
+      </div>
+
+    </div>
   );
 }
 
