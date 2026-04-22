@@ -1,6 +1,12 @@
 # Environment variables
 .env
 
+# Claude Code
+.claude/
+
+# Screenshots and local assets
+frontend/assets/
+
 # Generated PDFs
 *.pdf
 
