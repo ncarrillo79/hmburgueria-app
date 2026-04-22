@@ -14,11 +14,19 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
             style={{ padding: "6px", cursor: "pointer" }}
             onClick={async () => {
               try {
-                await atualizarStatus(pedido.numero, status);
+                const resultado = await atualizarStatus(pedido.id, status);
+
+                if (!resultado?.ok) {
+                  toast.dismiss(t.id);
+                  toast.error(resultado?.error || "No se pudo actualizar");
+                  return;
+                }
+
                 toast.dismiss(t.id);
                 toast.success("Estado actualizado");
                 onUpdate && onUpdate();
               } catch (error) {
+                toast.dismiss(t.id);
                 toast.error("Error al actualizar");
               }
             }}
@@ -47,11 +55,19 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
             style={{ padding: "6px", cursor: "pointer" }}
             onClick={async () => {
               try {
-                await eliminarPedido(pedido.numero);
+                const resultado = await eliminarPedido(pedido.id);
+
+                if (!resultado?.ok) {
+                  toast.dismiss(t.id);
+                  toast.error(resultado?.error || "No se pudo eliminar");
+                  return;
+                }
+
                 toast.dismiss(t.id);
                 toast.success("Pedido eliminado");
                 onUpdate && onUpdate();
               } catch (error) {
+                toast.dismiss(t.id);
                 toast.error("Error al eliminar");
               }
             }}
@@ -71,16 +87,35 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
   };
 
   const calcularTiempo = () => {
-    if (!pedido.data || !pedido.hora) return 0;
+    if (!pedido.createdAt) return 0;
 
-    const fecha = pedido.data.split("/").reverse().join("-");
-    const fechaCompleta = new Date(`${fecha}T${pedido.hora}`);
+    const fechaCompleta = new Date(pedido.createdAt);
+    if (isNaN(fechaCompleta.getTime())) return 0;
 
     const ahora = new Date();
-    return Math.floor((ahora - fechaCompleta) / 60000);
+    const diffMs = ahora - fechaCompleta;
+
+    if (diffMs < 0) return 0;
+
+    return Math.floor(diffMs / 60000);
+  };
+
+  const formatearHoraEntrada = () => {
+    if (!pedido.createdAt) return "--:--";
+
+    const fecha = new Date(pedido.createdAt);
+    if (isNaN(fecha.getTime())) return "--:--";
+
+    return fecha.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Sao_Paulo"
+    });
   };
 
   const minutos = calcularTiempo();
+  const horaEntrada = formatearHoraEntrada();
   const esUrgente = minutos > 10;
 
   const statusClass = (pedido.status || "").toLowerCase();
@@ -105,9 +140,12 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
           <p className="comentario">📝 {pedido.comentario}</p>
         )}
 
-        <p className={`tiempo ${esUrgente ? "urgente" : ""}`}>
-          ⏱ {minutos} min
-        </p>
+        <div className={`tiempo-wrapper ${esUrgente ? "urgente" : ""}`}>
+          <p className="hora-entrada">🕐 Entró a las {horaEntrada}</p>
+          <p className={`tiempo ${esUrgente ? "urgente" : ""}`}>
+            ⏱ Hace {minutos} min
+          </p>
+        </div>
       </div>
 
       <div className={`status-badge ${statusClass}`}>
