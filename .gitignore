@@ -1,3 +1,9 @@
+# Environment variables
+.env
+
+# Generated PDFs
+*.pdf
+
 # Logs
 logs
 *.log

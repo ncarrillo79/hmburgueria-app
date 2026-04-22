@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import axios from "axios";
 import { revisarPedidos } from "./jobs/watcher.js";
@@ -5,81 +6,99 @@ import { revisarPedidos } from "./jobs/watcher.js";
 const app = express();
 app.use(express.json());
 
-// 🔥 CORS
+// CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Content-Type");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
+  if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3AsfDAP0lMxBu-NzzEOgx50xp2OZL5TFlz5dvWvcBl_h9sVxadJd68e5NOWAwBdBByQ/exec";
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL;
 
-// 📦 GET pedidos (ULTRA SEGURO)
+// 📦 GET pedidos
 app.get("/pedidos", async (req, res) => {
   try {
     console.log("📡 Llamando Google Sheets...");
 
     const response = await axios.get(GOOGLE_SCRIPT_URL);
-
     let data = response.data;
 
-    console.log("📥 RAW:", data);
-
-    // 🔥 PROTEGER TODO
-    if (!data) data = [];
-    if (!Array.isArray(data)) {
-      console.log("⚠️ No es array, forzando array");
+    if (!data || !Array.isArray(data)) {
+      console.log("⚠️ Respuesta inesperada, forzando array vacío");
       data = [];
     }
 
     const pedidos = data.map((p, index) => {
       return {
-        numero: p?.numero || index + 1,
-        cliente: p?.cliente || "",
-        endereco: p?.endereco || "",
-        descricao: p?.descricao || "",
+        // 🔥 id = timestamp estable que usa el Apps Script para identificar la fila
+        id: p?.id ?? null,
+
+        // numero = solo para mostrar en pantalla (posición 1-based)
+        numero: index + 1,
+
+        cliente:    p?.cliente    || "",
+        endereco:   p?.endereco   || "",
+        descricao:  p?.descricao  || "",
         comentario: p?.comentario || "",
-        status: p?.status || "Novo",
-        data: p?.data || "",
-        hora: p?.hora || "",
-        eliminado: p?.eliminado || ""
+        status:     p?.status     || "Novo",
+
+        // data y hora vienen formateadas por el Apps Script en GMT-3
+        data:       p?.data       || "",
+        hora:       p?.hora       || "",
+
+        // createdAt = ISO string UTC → úsalo para calcular tiempo transcurrido
+        createdAt:  p?.createdAt  || null,
+
+        eliminado:  p?.eliminado  ?? false,
+        impreso:    p?.impreso    ?? false,
       };
     });
 
     res.json(pedidos);
 
   } catch (error) {
-    console.error("❌ ERROR REAL:", error.response?.data || error.message);
-
-    // 🔥 NO ROMPER NUNCA
-    res.json([]); 
+    console.error("❌ ERROR GET /pedidos:", error.response?.data || error.message);
+    res.json([]);
   }
 });
 
-// 🔄 STATUS / ELIMINAR
+// 🔄 POST /status — actualizar status o soft-delete
 app.post("/status", async (req, res) => {
   try {
-    const { numero, status, eliminar } = req.body;
+    // 🔥 recibe id (timestamp), no numero
+    const { id, status, eliminar, impreso } = req.body;
 
-    console.log("📥 STATUS:", req.body);
+    console.log("📥 POST /status:", req.body);
 
-    await axios.post(GOOGLE_SCRIPT_URL, {
-      numero,
-      status: eliminar ? null : status,
-      eliminar: eliminar || false
+    if (!id) {
+      return res.status(400).json({ ok: false, error: "Falta el campo id" });
+    }
+
+    // Llamamos al Apps Script y capturamos su respuesta
+    const gsResponse = await axios.post(GOOGLE_SCRIPT_URL, {
+      id,
+      status:   eliminar ? undefined : status,
+      eliminar: eliminar  ?? false,
+      impreso:  impreso   ?? undefined,
     });
+
+    console.log("📤 Respuesta Apps Script:", gsResponse.data);
+
+    // 🔥 validamos la respuesta del Apps Script antes de confirmar éxito
+    if (gsResponse.data?.ok === false) {
+      return res.status(404).json({
+        ok: false,
+        error: gsResponse.data.error || "Pedido no encontrado en la hoja",
+      });
+    }
 
     res.json({ ok: true });
 
   } catch (error) {
-    console.error("❌ ERROR STATUS:", error.message);
-    res.status(500).json({ error: "Error actualizando pedido" });
+    console.error("❌ ERROR POST /status:", error.message);
+    res.status(500).json({ ok: false, error: "Error actualizando pedido" });
   }
 });
 
@@ -88,7 +107,7 @@ app.listen(3001, () => {
   console.log("🚀 Backend corriendo en http://localhost:3001");
 });
 
-// 🖨️ WATCHER
+// 🖨️ WATCHER — revisa pedidos nuevos cada 5s para imprimir
 setInterval(() => {
   revisarPedidos();
 }, 5000);
