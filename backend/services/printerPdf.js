@@ -17,7 +17,8 @@ export function imprimirPdf(pedido) {
 
     doc.pipe(stream);
 
-    doc.fontSize(16).text("🍔 HAMBURGUERIA", { align: "center" });
+    const nombre = process.env.BUSINESS_NAME || "Hamburgueria";
+    doc.fontSize(16).text(nombre, { align: "center" });
     doc.moveDown();
 
     doc.fontSize(12);
