@@ -170,15 +170,17 @@ Se necessário, atualizar `THERMAL_PRINTER_PATH` no `.env` e salvar.
 
 ---
 
-## ✅ 6. Instalar e configurar PM2
+## ✅ 6. Instalar e configurar NSSM
 
-O PM2 mantém o backend e o frontend rodando mesmo após fechar a janela do terminal.
+O NSSM registra o backend e o frontend como serviços do Windows,
+fazendo com que iniciem automaticamente sem precisar abrir nenhum terminal.
 
-**Instalar PM2:**
+**Baixar o NSSM:**
 
-```bash
-npm install -g pm2
-```
+1. Acessar **nssm.cc/download**
+2. Baixar a versão **64-bit**
+3. Extrair o arquivo zip
+4. Copiar o arquivo `nssm.exe` para `C:\Windows\System32\`
 
 **Compilar o frontend:**
 
@@ -187,37 +189,61 @@ cd frontend
 npm run build
 ```
 
-**Iniciar o backend:**
+**Abrir o terminal como administrador:**
+
+1. Clicar em **Iniciar**
+2. Digitar `cmd`
+3. Clicar com o botão direito em **Prompt de Comando**
+4. Clicar em **Executar como administrador**
+
+**Registrar o backend como serviço:**
 
 ```bash
-cd ..\backend
-pm2 start server.js --name hamburgueria-backend
+nssm install hamburgueria-backend
 ```
 
-**Iniciar o frontend:**
+Na janela que abrir, preencher:
+
+| Campo | Valor |
+|---|---|
+| Path | `C:\Program Files\nodejs\node.exe` |
+| Startup directory | `C:\Users\[usuario]\Desktop\hmburgueria-app\backend` |
+| Arguments | `server.js` |
+
+Clicar em **Install service**, depois:
 
 ```bash
-cd ..\frontend
-pm2 start serve-frontend.cjs --name hamburgueria-frontend
+nssm start hamburgueria-backend
 ```
 
-**Salvar e configurar inicialização automática com o Windows:**
+**Registrar o frontend como serviço:**
 
 ```bash
-pm2 save
-pm2 startup
+nssm install hamburgueria-frontend
 ```
 
-Executar o comando que o PM2 mostrar na tela para que o sistema
-inicie automaticamente com o Windows.
+Na janela que abrir, preencher:
 
-Verificar que ambos estão rodando:
+| Campo | Valor |
+|---|---|
+| Path | `C:\Program Files\nodejs\node.exe` |
+| Startup directory | `C:\Users\[usuario]\Desktop\hmburgueria-app\frontend` |
+| Arguments | `serve-frontend.cjs` |
+
+Clicar em **Install service**, depois:
 
 ```bash
-pm2 status
+nssm start hamburgueria-frontend
 ```
 
-Devem aparecer `hamburgueria-backend` e `hamburgueria-frontend` com status `online` ✅
+**Verificar que ambos estão rodando:**
+
+```bash
+nssm status hamburgueria-backend
+nssm status hamburgueria-frontend
+```
+
+Ambos devem retornar `SERVICE_RUNNING` ✅
 
 ---
 
@@ -239,8 +265,8 @@ Executar cada item e confirmar o resultado:
 
 ## ✅ 8. Confirmação final
 
-- [ ] `hamburgueria-backend` está com status `online` no PM2
-- [ ] `hamburgueria-frontend` está com status `online` no PM2
+- [ ] `nssm status hamburgueria-backend` retorna `SERVICE_RUNNING`
+- [ ] `nssm status hamburgueria-frontend` retorna `SERVICE_RUNNING`
 - [ ] Sistema inicia automaticamente com o Windows
 - [ ] Cliente consegue ver os pedidos em `http://localhost:3000`
 - [ ] Impressora imprime os tickets corretamente
