@@ -172,12 +172,38 @@ Se necessário, atualizar `THERMAL_PRINTER_PATH` no `.env` e salvar.
 
 ## ✅ 6. Instalar e configurar PM2
 
-O PM2 mantém o backend rodando mesmo após fechar a janela do terminal.
+O PM2 mantém o backend e o frontend rodando mesmo após fechar a janela do terminal.
+
+**Instalar PM2:**
 
 ```bash
 npm install -g pm2
-cd backend
-pm2 start server.js --name hamburgueria
+```
+
+**Compilar o frontend:**
+
+```bash
+cd frontend
+npm run build
+```
+
+**Iniciar o backend:**
+
+```bash
+cd ..\backend
+pm2 start server.js --name hamburgueria-backend
+```
+
+**Iniciar o frontend:**
+
+```bash
+cd ..\frontend
+pm2 start serve-frontend.cjs --name hamburgueria-frontend
+```
+
+**Salvar e configurar inicialização automática com o Windows:**
+
+```bash
 pm2 save
 pm2 startup
 ```
@@ -185,13 +211,13 @@ pm2 startup
 Executar o comando que o PM2 mostrar na tela para que o sistema
 inicie automaticamente com o Windows.
 
-Verificar que está rodando:
+Verificar que ambos estão rodando:
 
 ```bash
 pm2 status
 ```
 
-Deve aparecer `hamburgueria` com status `online` ✅
+Devem aparecer `hamburgueria-backend` e `hamburgueria-frontend` com status `online` ✅
 
 ---
 
@@ -202,7 +228,7 @@ Executar cada item e confirmar o resultado:
 | Teste | Como testar | Resultado esperado |
 |---|---|---|
 | Backend responde | Abrir `http://localhost:3001/pedidos` no navegador | Lista de pedidos em JSON |
-| Frontend carrega | Abrir `http://localhost:5173` no navegador | Tela do Kanban aparece |
+| Frontend carrega | Abrir `http://localhost:3000` no navegador | Tela do Kanban aparece |
 | Novo pedido aparece | Inserir pedido de teste no Google Sheets | Pedido aparece na tela em até 3s |
 | Som de alerta | Aguardar pedido novo | Toca `notify.mp3` |
 | Impressão | Verificar se o ticket saiu na impressora | Ticket impresso corretamente |
@@ -213,11 +239,12 @@ Executar cada item e confirmar o resultado:
 
 ## ✅ 8. Confirmação final
 
-- [ ] PM2 está com status `online`
+- [ ] `hamburgueria-backend` está com status `online` no PM2
+- [ ] `hamburgueria-frontend` está com status `online` no PM2
 - [ ] Sistema inicia automaticamente com o Windows
-- [ ] Cliente consegue ver os pedidos na tela
+- [ ] Cliente consegue ver os pedidos em `http://localhost:3000`
 - [ ] Impressora imprime os tickets corretamente
-- [ ] Cliente sabe que não deve fechar o terminal do PM2
+- [ ] Cliente sabe que não precisa abrir nenhum terminal
 
 > Ao finalizar, combinar com o cliente um contato de suporte
 > para os primeiros dias de operação.
