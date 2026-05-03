@@ -176,7 +176,8 @@ O PM2 mantém o backend rodando mesmo após fechar a janela do terminal.
 
 ```bash
 npm install -g pm2
-pm2 start backend/server.js --name hamburgueria
+cd backend
+pm2 start server.js --name hamburgueria
 pm2 save
 pm2 startup
 ```
