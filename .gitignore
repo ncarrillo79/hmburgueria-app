@@ -10,6 +10,9 @@ frontend/assets/
 # Generated PDFs
 *.pdf
 
+# Runtime data
+backend/pedidos-impresos.json
+
 # Logs
 logs
 *.log
