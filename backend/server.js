@@ -42,6 +42,8 @@ app.get("/pedidos", async (req, res) => {
         endereco:   p?.endereco   || "",
         descricao:  p?.descricao  || "",
         comentario: p?.comentario || "",
+        bairro:     p?.bairro     || "",
+        taxa:       p?.taxa       ?? 0,
         status:     p?.status     || "Novo",
 
         // data y hora vienen formateadas por el Apps Script en GMT-3
