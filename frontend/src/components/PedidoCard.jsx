@@ -7,7 +7,7 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
   const handleStatus = (status) => {
     toast((t) => (
       <div>
-        <p>¿Cambiar estado del pedido?</p>
+        <p>Alterar status do pedido?</p>
 
         <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
           <button
@@ -18,27 +18,27 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
 
                 if (!resultado?.ok) {
                   toast.dismiss(t.id);
-                  toast.error(resultado?.error || "No se pudo actualizar");
+                  toast.error(resultado?.error || "Não foi possível atualizar");
                   return;
                 }
 
                 toast.dismiss(t.id);
-                toast.success("Estado actualizado");
+                toast.success("Status atualizado");
                 onUpdate && onUpdate();
               } catch (error) {
                 toast.dismiss(t.id);
-                toast.error("Error al actualizar");
+                toast.error("Erro ao atualizar");
               }
             }}
           >
-            Sí
+            Sim
           </button>
 
           <button
             style={{ padding: "6px", cursor: "pointer" }}
             onClick={() => toast.dismiss(t.id)}
           >
-            No
+            Não
           </button>
         </div>
       </div>
@@ -48,7 +48,7 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
   const handleDelete = () => {
     toast((t) => (
       <div>
-        <p>¿Eliminar pedido?</p>
+        <p>Eliminar pedido?</p>
 
         <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
           <button
@@ -59,7 +59,7 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
 
                 if (!resultado?.ok) {
                   toast.dismiss(t.id);
-                  toast.error(resultado?.error || "No se pudo eliminar");
+                  toast.error(resultado?.error || "Não foi possível eliminar");
                   return;
                 }
 
@@ -68,18 +68,18 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
                 onUpdate && onUpdate();
               } catch (error) {
                 toast.dismiss(t.id);
-                toast.error("Error al eliminar");
+                toast.error("Erro ao eliminar");
               }
             }}
           >
-            Sí
+            Sim
           </button>
 
           <button
             style={{ padding: "6px", cursor: "pointer" }}
             onClick={() => toast.dismiss(t.id)}
           >
-            No
+            Não
           </button>
         </div>
       </div>
@@ -141,9 +141,9 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
         )}
 
         <div className={`tiempo-wrapper ${esUrgente ? "urgente" : ""}`}>
-          <p className="hora-entrada">🕐 Entró a las {horaEntrada}</p>
+          <p className="hora-entrada">🕐 Entrou às {horaEntrada}</p>
           <p className={`tiempo ${esUrgente ? "urgente" : ""}`}>
-            ⏱ Hace {minutos} min
+            ⏱ Há {minutos} min
           </p>
         </div>
       </div>
@@ -158,7 +158,7 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
         </button>
 
         <button className="btn listo-btn" onClick={() => handleStatus("listo")}>
-          Listo
+          Pronto
         </button>
 
         <button className="btn cancelar" onClick={() => handleStatus("cancelado")}>

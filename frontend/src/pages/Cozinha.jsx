@@ -81,9 +81,9 @@ function Cozinha() {
   // 🔥 definición de los botones de filtro (fuente única de verdad)
   const botonesFiltro = [
     { key: "todos",      label: "Todos",      icono: "📋" },
-    { key: "novo",       label: "Nuevos",     icono: "🟡" },
+    { key: "novo",       label: "Novos",      icono: "🟡" },
     { key: "preparando", label: "Preparando", icono: "🟠" },
-    { key: "listo",      label: "Listos",     icono: "🟢" },
+    { key: "listo",      label: "Prontos",    icono: "🟢" },
     { key: "cancelado",  label: "Cancelados", icono: "🔴" },
   ];
 
@@ -113,7 +113,7 @@ function Cozinha() {
 
         {mostrarColumna("novo") && (
           <div className="column">
-            <h2 className="col-title">🟡 Nuevos ({contadores.novo})</h2>
+            <h2 className="col-title">🟡 Novos ({contadores.novo})</h2>
             {pedidos
               .filter(p => normalizar(p.status) === "novo")
               .map(p => (
@@ -135,7 +135,7 @@ function Cozinha() {
 
         {mostrarColumna("listo") && (
           <div className="column">
-            <h2 className="col-title">🟢 Listos ({contadores.listo})</h2>
+            <h2 className="col-title">🟢 Prontos ({contadores.listo})</h2>
             {pedidos
               .filter(p => normalizar(p.status) === "listo")
               .map(p => (

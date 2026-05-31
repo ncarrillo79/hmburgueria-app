@@ -4,22 +4,22 @@ import { atualizarStatus, eliminarPedido } from "../services/api";
 
 function PedidoCard({ pedido, onUpdate, isNew }) {
   const handleStatus = async (status) => {
-    const confirmacion = window.confirm("¿Cambiar estado del pedido?");
+    const confirmacion = window.confirm("Alterar status do pedido?");
     if (!confirmacion) return;
 
     try {
       await atualizarStatus(pedido.numero, status);
-      toast.success("Estado actualizado");
+      toast.success("Status atualizado");
 
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error(error);
-      toast.error("No se pudo actualizar el estado");
+      toast.error("Não foi possível atualizar o status");
     }
   };
 
   const handleDelete = async () => {
-    const confirmacion = window.confirm("¿Eliminar pedido?");
+    const confirmacion = window.confirm("Eliminar pedido?");
     if (!confirmacion) return;
 
     try {
@@ -29,7 +29,7 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error(error);
-      toast.error("No se pudo eliminar el pedido");
+      toast.error("Não foi possível eliminar o pedido");
     }
   };
 
@@ -93,7 +93,7 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
           className="btn listo-btn"
           onClick={() => handleStatus("listo")}
         >
-          Listo
+          Pronto
         </button>
 
         <button

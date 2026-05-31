@@ -16,7 +16,7 @@ function App() {
         fontSize: "20px",
         fontWeight: "bold"
       }}>
-        🍔 Sistema de Cocina - Hamburguería
+        🍔 Sistema de Cozinha - Hamburgueria
       </header>
 
       <main style={{ padding: "20px" }}>
