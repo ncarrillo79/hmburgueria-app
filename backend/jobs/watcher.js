@@ -5,7 +5,7 @@ import axios from "axios";
 import { imprimirPedido } from "../services/printer.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BACKEND_URL = "http://localhost:3001";
+const BACKEND_URL = `http://localhost:${process.env.PORT || 3001}`;
 const IMPRESOS_PATH = path.join(__dirname, "../pedidos-impresos.json");
 
 function cargarImpresos() {
