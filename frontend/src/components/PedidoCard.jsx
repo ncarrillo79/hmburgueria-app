@@ -2,165 +2,166 @@ import React from "react";
 import toast from "react-hot-toast";
 import { atualizarStatus, eliminarPedido } from "../services/api";
 
+function confirmar(mensagem, onSim) {
+  toast((t) => (
+    <div className="toast-confirm">
+      <p className="toast-msg">{mensagem}</p>
+      <div className="toast-actions">
+        <button
+          className="toast-btn toast-sim"
+          onClick={async () => {
+            toast.dismiss(t.id);
+            await onSim();
+          }}
+        >
+          Sim
+        </button>
+        <button
+          className="toast-btn toast-nao"
+          onClick={() => toast.dismiss(t.id)}
+        >
+          Não
+        </button>
+      </div>
+    </div>
+  ), { duration: 8000 });
+}
+
 function PedidoCard({ pedido, onUpdate, isNew }) {
 
   const handleStatus = (status) => {
-    toast((t) => (
-      <div>
-        <p>Alterar status do pedido?</p>
-
-        <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-          <button
-            style={{ padding: "6px", cursor: "pointer" }}
-            onClick={async () => {
-              try {
-                const resultado = await atualizarStatus(pedido.id, status);
-
-                if (!resultado?.ok) {
-                  toast.dismiss(t.id);
-                  toast.error(resultado?.error || "Não foi possível atualizar");
-                  return;
-                }
-
-                toast.dismiss(t.id);
-                toast.success("Status atualizado");
-                onUpdate && onUpdate();
-              } catch (error) {
-                toast.dismiss(t.id);
-                toast.error("Erro ao atualizar");
-              }
-            }}
-          >
-            Sim
-          </button>
-
-          <button
-            style={{ padding: "6px", cursor: "pointer" }}
-            onClick={() => toast.dismiss(t.id)}
-          >
-            Não
-          </button>
-        </div>
-      </div>
-    ));
-  };
-
-  const handleDelete = () => {
-    toast((t) => (
-      <div>
-        <p>Eliminar pedido?</p>
-
-        <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-          <button
-            style={{ padding: "6px", cursor: "pointer" }}
-            onClick={async () => {
-              try {
-                const resultado = await eliminarPedido(pedido.id);
-
-                if (!resultado?.ok) {
-                  toast.dismiss(t.id);
-                  toast.error(resultado?.error || "Não foi possível eliminar");
-                  return;
-                }
-
-                toast.dismiss(t.id);
-                toast.success("Pedido eliminado");
-                onUpdate && onUpdate();
-              } catch (error) {
-                toast.dismiss(t.id);
-                toast.error("Erro ao eliminar");
-              }
-            }}
-          >
-            Sim
-          </button>
-
-          <button
-            style={{ padding: "6px", cursor: "pointer" }}
-            onClick={() => toast.dismiss(t.id)}
-          >
-            Não
-          </button>
-        </div>
-      </div>
-    ));
-  };
-
-  const calcularTiempo = () => {
-    if (!pedido.createdAt) return 0;
-
-    const fechaCompleta = new Date(pedido.createdAt);
-    if (isNaN(fechaCompleta.getTime())) return 0;
-
-    const ahora = new Date();
-    const diffMs = ahora - fechaCompleta;
-
-    if (diffMs < 0) return 0;
-
-    return Math.floor(diffMs / 60000);
-  };
-
-  const formatearHoraEntrada = () => {
-    if (!pedido.createdAt) return "--:--";
-
-    const fecha = new Date(pedido.createdAt);
-    if (isNaN(fecha.getTime())) return "--:--";
-
-    return fecha.toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "America/Sao_Paulo"
+    confirmar(`Alterar para "${status}"?`, async () => {
+      try {
+        const res = await atualizarStatus(pedido.id, status);
+        if (!res?.ok) {
+          toast.error(res?.error || "Não foi possível atualizar");
+          return;
+        }
+        toast.success("Status atualizado");
+        onUpdate?.();
+      } catch {
+        toast.error("Erro ao atualizar");
+      }
     });
   };
 
-  const minutos = calcularTiempo();
-  const horaEntrada = formatearHoraEntrada();
-  const esUrgente = minutos > 10;
+  const handleDelete = () => {
+    confirmar("Eliminar este pedido?", async () => {
+      try {
+        const res = await eliminarPedido(pedido.id);
+        if (!res?.ok) {
+          toast.error(res?.error || "Não foi possível eliminar");
+          return;
+        }
+        toast.success("Pedido eliminado");
+        onUpdate?.();
+      } catch {
+        toast.error("Erro ao eliminar");
+      }
+    });
+  };
 
-  const statusClass = (pedido.status || "").toLowerCase();
+  const calcularMinutos = () => {
+    if (!pedido.createdAt) return 0;
+    const t = new Date(pedido.createdAt);
+    if (isNaN(t)) return 0;
+    return Math.max(0, Math.floor((Date.now() - t) / 60000));
+  };
+
+  const formatarHora = () => {
+    if (!pedido.createdAt) return "--:--";
+    const t = new Date(pedido.createdAt);
+    if (isNaN(t)) return "--:--";
+    return t.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/Sao_Paulo",
+    });
+  };
+
+  const minutos    = calcularMinutos();
+  const horaEntrada = formatarHora();
+  const esUrgente  = minutos > 10;
+  const statusCls  = (pedido.status || "").toLowerCase();
+
+  // Parsear ítems del pedido: dividir por newline o coma
+  const items = (pedido.descricao || "")
+    .split(/\n|,/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return (
-    <div className={`card ${statusClass} ${esUrgente ? "urgente" : ""} ${isNew ? "nuevo-highlight" : ""}`}>
+    <div className={`card ${statusCls} ${esUrgente ? "urgente" : ""} ${isNew ? "nuevo-highlight" : ""}`}>
 
+      {/* ── HEADER ── */}
       <div className="card-header">
-        <span>Pedido #{pedido.numero}</span>
-
-        <button className="trash-btn" onClick={handleDelete} title="Eliminar">
-          🗑️
-        </button>
-      </div>
-
-      <div className="card-body">
-        <p className="cliente">{pedido.cliente}</p>
-        <p className="descripcion">{pedido.descricao}</p>
-        <p className="direccion">{pedido.endereco}</p>
-
-        {pedido.comentario && (
-          <p className="comentario">📝 {pedido.comentario}</p>
-        )}
-
-        <div className={`tiempo-wrapper ${esUrgente ? "urgente" : ""}`}>
-          <p className="hora-entrada">🕐 Entrou às {horaEntrada}</p>
-          <p className={`tiempo ${esUrgente ? "urgente" : ""}`}>
-            ⏱ Há {minutos} min
-          </p>
+        <span className="card-order-num">#{pedido.numero}</span>
+        <div className="card-header-right">
+          <span className={`card-time-badge ${esUrgente ? "urgente" : ""}`}>
+            {esUrgente ? "🔥" : "⏱"} {minutos} min
+          </span>
+          <button className="trash-btn" onClick={handleDelete} title="Eliminar pedido">
+            ✕
+          </button>
         </div>
       </div>
 
-      <div className={`status-badge ${statusClass}`}>
-        {pedido.status}
+      {/* ── CLIENTE ── */}
+      <div className="card-cliente">{pedido.cliente}</div>
+
+      <div className="card-divider" />
+
+      {/* ── ÍTEMS ── */}
+      {items.length > 0 && (
+        <ul className="card-items">
+          {items.map((item, i) => (
+            <li key={i} className="card-item">{item}</li>
+          ))}
+        </ul>
+      )}
+
+      {/* ── META (dirección, bairro, taxa) ── */}
+      <div className="card-meta">
+        {pedido.endereco && (
+          <div className="card-meta-row">
+            <span className="card-meta-icon">📍</span>
+            <span className="card-meta-text">{pedido.endereco}</span>
+          </div>
+        )}
+        {pedido.bairro && (
+          <div className="card-meta-row">
+            <span className="card-meta-icon">🏘</span>
+            <span className="card-meta-text">{pedido.bairro}</span>
+          </div>
+        )}
+        {pedido.taxa != null && pedido.taxa !== "" && (
+          <div className="card-meta-row">
+            <span className="card-meta-icon">🛵</span>
+            <span className="card-meta-text">Taxa: R$ {Number(pedido.taxa).toFixed(2)}</span>
+          </div>
+        )}
       </div>
 
+      {/* ── COMENTÁRIO ── */}
+      {pedido.comentario && (
+        <div className="card-comment">
+          <span>📝</span>
+          <span>{pedido.comentario}</span>
+        </div>
+      )}
+
+      {/* ── HORA ENTRADA ── */}
+      <div className="card-hora">🕐 Entrou às {horaEntrada}</div>
+
+      {/* ── ACTIONS ── */}
       <div className="actions">
         <button className="btn preparar" onClick={() => handleStatus("preparando")}>
           Preparar
         </button>
-
         <button className="btn listo-btn" onClick={() => handleStatus("listo")}>
-          Pronto
+          Pronto ✓
         </button>
-
         <button className="btn cancelar" onClick={() => handleStatus("cancelado")}>
           Cancelar
         </button>

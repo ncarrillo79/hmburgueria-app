@@ -2,62 +2,58 @@ import React, { useEffect, useRef, useState } from "react";
 import PedidoCard from "../components/PedidoCard";
 import { getPedidos } from "../services/api";
 
+const BOTONES_FILTRO = [
+  { key: "todos",      label: "Todos",      icono: "◈" },
+  { key: "novo",       label: "Novos",      icono: "●" },
+  { key: "preparando", label: "Preparando", icono: "●" },
+  { key: "listo",      label: "Prontos",    icono: "●" },
+  { key: "cancelado",  label: "Cancelados", icono: "●" },
+];
+
+const COLUMNAS = [
+  { key: "novo",       label: "NOVOS",      cls: "col-novo",       vazio: "Nenhum pedido novo" },
+  { key: "preparando", label: "PREPARANDO", cls: "col-preparando", vazio: "Nenhum em preparo" },
+  { key: "listo",      label: "PRONTOS",    cls: "col-listo",      vazio: "Nenhum pronto" },
+  { key: "cancelado",  label: "CANCELADOS", cls: "col-cancelado",  vazio: "Nenhum cancelado" },
+];
+
 function Cozinha() {
   const [pedidos, setPedidos] = useState([]);
   const [filtro, setFiltro] = useState("todos");
-
-  // 🔥 useRef → SIEMPRE actualizado (para detectar pedidos nuevos)
   const idsPreviosRef = useRef([]);
-
   const audioRef = useRef(null);
 
-  // 🔓 desbloquear audio con interacción
   useEffect(() => {
     audioRef.current = new Audio("/notify.mp3");
-
-    const unlockAudio = () => {
+    const unlock = () => {
       audioRef.current.play().then(() => {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }).catch(() => {});
-
-      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("click", unlock);
     };
-
-    window.addEventListener("click", unlockAudio);
-
-    return () => window.removeEventListener("click", unlockAudio);
+    window.addEventListener("click", unlock);
+    return () => window.removeEventListener("click", unlock);
   }, []);
 
   const fetchData = async () => {
     try {
       const data = await getPedidos();
-
       const visibles = (data || []).filter(
         (p) => String(p.eliminado).toLowerCase() !== "true"
       );
-
-      // 🔥 usar pedido.id (UUID) en vez de numero
-      const idsActuales = visibles.map(p => p.id);
-
+      const idsActuales = visibles.map((p) => p.id);
       const nuevos = idsActuales.filter(
-        id => !idsPreviosRef.current.includes(id)
+        (id) => !idsPreviosRef.current.includes(id)
       );
-
-      // 🔔 SOLO SI HAY NUEVOS
       if (nuevos.length > 0 && idsPreviosRef.current.length > 0) {
-        console.log("🔔 NUEVO PEDIDO:", nuevos);
-
         audioRef.current.currentTime = 0;
         audioRef.current.play().catch(() => {});
       }
-
       idsPreviosRef.current = idsActuales;
-
       setPedidos(visibles);
-
-    } catch (error) {
-      console.error("Error fetch:", error);
+    } catch (e) {
+      console.error("Error fetch:", e);
     }
   };
 
@@ -67,95 +63,74 @@ function Cozinha() {
     return () => clearInterval(interval);
   }, []);
 
-  const normalizar = (s) => (s || "").toLowerCase().trim();
+  const norm = (s) => (s || "").toLowerCase().trim();
 
-  // 🔥 contadores por estado (se recalculan automáticamente cuando cambia pedidos)
   const contadores = {
     todos:      pedidos.length,
-    novo:       pedidos.filter(p => normalizar(p.status) === "novo").length,
-    preparando: pedidos.filter(p => normalizar(p.status) === "preparando").length,
-    listo:      pedidos.filter(p => normalizar(p.status) === "listo").length,
-    cancelado:  pedidos.filter(p => normalizar(p.status) === "cancelado").length,
+    novo:       pedidos.filter((p) => norm(p.status) === "novo").length,
+    preparando: pedidos.filter((p) => norm(p.status) === "preparando").length,
+    listo:      pedidos.filter((p) => norm(p.status) === "listo").length,
+    cancelado:  pedidos.filter((p) => norm(p.status) === "cancelado").length,
   };
 
-  // 🔥 definición de los botones de filtro (fuente única de verdad)
-  const botonesFiltro = [
-    { key: "todos",      label: "Todos",      icono: "📋" },
-    { key: "novo",       label: "Novos",      icono: "🟡" },
-    { key: "preparando", label: "Preparando", icono: "🟠" },
-    { key: "listo",      label: "Prontos",    icono: "🟢" },
-    { key: "cancelado",  label: "Cancelados", icono: "🔴" },
-  ];
-
-  // 🔥 helper: decide si una columna debe mostrarse según el filtro activo
-  const mostrarColumna = (estado) => filtro === "todos" || filtro === estado;
+  const columnasFiltradas =
+    filtro === "todos"
+      ? COLUMNAS
+      : COLUMNAS.filter((c) => c.key === filtro);
 
   return (
-    <div>
+    <div className="cozinha-root">
 
-      {/* 🔽 BARRA DE FILTRO CON BOTONES */}
+      {/* ── FILTRO BAR ── */}
       <div className="filtro-bar">
-        {botonesFiltro.map((btn) => (
+        {BOTONES_FILTRO.map((btn) => (
           <button
             key={btn.key}
-            className={`filtro-btn ${filtro === btn.key ? "activo" : ""} ${btn.key}`}
+            className={`filtro-btn ${btn.key} ${filtro === btn.key ? "activo" : ""}`}
             onClick={() => setFiltro(btn.key)}
           >
-            <span className="filtro-icono">{btn.icono}</span>
+            <span className={`filtro-dot filtro-dot-${btn.key}`} />
             <span className="filtro-texto">{btn.label}</span>
             <span className="filtro-contador">{contadores[btn.key]}</span>
           </button>
         ))}
       </div>
 
-      {/* 🔽 KANBAN */}
+      {/* ── KANBAN ── */}
       <div className="kanban">
+        {columnasFiltradas.map((col) => {
+          const cards = pedidos.filter((p) => norm(p.status) === col.key);
+          return (
+            <div key={col.key} className={`column ${col.cls}`}>
+              <div className="column-inner">
 
-        {mostrarColumna("novo") && (
-          <div className="column">
-            <h2 className="col-title">🟡 Novos ({contadores.novo})</h2>
-            {pedidos
-              .filter(p => normalizar(p.status) === "novo")
-              .map(p => (
-                <PedidoCard key={p.id} pedido={p} onUpdate={fetchData} />
-              ))}
-          </div>
-        )}
+                <div className="col-header">
+                  <div className="col-title-wrap">
+                    <div className="col-status-dot" />
+                    <h2 className="col-title">{col.label}</h2>
+                  </div>
+                  <span className="col-count">{cards.length}</span>
+                </div>
 
-        {mostrarColumna("preparando") && (
-          <div className="column">
-            <h2 className="col-title">🟠 Preparando ({contadores.preparando})</h2>
-            {pedidos
-              .filter(p => normalizar(p.status) === "preparando")
-              .map(p => (
-                <PedidoCard key={p.id} pedido={p} onUpdate={fetchData} />
-              ))}
-          </div>
-        )}
+                <div className="column-cards">
+                  {cards.length === 0 ? (
+                    <div className="col-empty">
+                      <div className="col-empty-icon">📭</div>
+                      {col.vazio}
+                    </div>
+                  ) : (
+                    cards.map((p) => (
+                      <PedidoCard key={p.id} pedido={p} onUpdate={fetchData} />
+                    ))
+                  )}
+                </div>
 
-        {mostrarColumna("listo") && (
-          <div className="column">
-            <h2 className="col-title">🟢 Prontos ({contadores.listo})</h2>
-            {pedidos
-              .filter(p => normalizar(p.status) === "listo")
-              .map(p => (
-                <PedidoCard key={p.id} pedido={p} onUpdate={fetchData} />
-              ))}
-          </div>
-        )}
-
-        {mostrarColumna("cancelado") && (
-          <div className="column">
-            <h2 className="col-title">🔴 Cancelados ({contadores.cancelado})</h2>
-            {pedidos
-              .filter(p => normalizar(p.status) === "cancelado")
-              .map(p => (
-                <PedidoCard key={p.id} pedido={p} onUpdate={fetchData} />
-              ))}
-          </div>
-        )}
-
+              </div>
+            </div>
+          );
+        })}
       </div>
+
     </div>
   );
 }
