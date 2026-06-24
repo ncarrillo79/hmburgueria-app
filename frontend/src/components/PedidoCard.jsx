@@ -85,9 +85,10 @@ function PedidoCard({ pedido, onUpdate, isNew }) {
   const esUrgente  = minutos > 10;
   const statusCls  = (pedido.status || "").toLowerCase();
 
-  // Parsear ítems del pedido: dividir por newline o coma
+  // Parsear ítems del pedido: dividir solo por salto de línea
+  // (no por coma, ya que los precios brasileños usan coma: "R$ 25,00")
   const items = (pedido.descricao || "")
-    .split(/\n|,/)
+    .split(/\n/)
     .map((s) => s.trim())
     .filter(Boolean);
 

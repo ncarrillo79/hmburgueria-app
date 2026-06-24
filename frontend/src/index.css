@@ -402,6 +402,7 @@ body {
   gap: 0;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0; /* evita que el flex container comprima las cards */
   transition: background 0.18s var(--ease),
               border-color 0.18s var(--ease),
               transform 0.18s var(--ease),
@@ -599,7 +600,7 @@ body {
 /* ── HORA ENTRADA ── */
 .card-hora {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-sub);
   font-weight: 500;
   margin-top: 9px;
   letter-spacing: 0.2px;
@@ -631,32 +632,32 @@ body {
 .btn:active { transform: translateY(0); filter: brightness(0.9); }
 
 .preparar {
-  background: var(--prep-a10);
-  border-color: var(--prep-a35);
+  background: rgba(249,115,22,0.22);
+  border-color: rgba(249,115,22,0.55);
   color: #fb923c;
 }
 .preparar:hover {
-  background: rgba(249,115,22,0.28);
+  background: rgba(249,115,22,0.38);
   color: #fff;
 }
 
 .listo-btn {
-  background: var(--listo-a10);
-  border-color: var(--listo-a35);
+  background: rgba(16,185,129,0.22);
+  border-color: rgba(16,185,129,0.55);
   color: #34d399;
 }
 .listo-btn:hover {
-  background: rgba(16,185,129,0.28);
+  background: rgba(16,185,129,0.38);
   color: #fff;
 }
 
 .cancelar {
-  background: var(--cancel-a10);
-  border-color: var(--cancel-a35);
+  background: rgba(239,68,68,0.22);
+  border-color: rgba(239,68,68,0.55);
   color: #f87171;
 }
 .cancelar:hover {
-  background: rgba(239,68,68,0.28);
+  background: rgba(239,68,68,0.38);
   color: #fff;
 }
 
