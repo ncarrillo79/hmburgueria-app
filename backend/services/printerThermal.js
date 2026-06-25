@@ -55,7 +55,7 @@ export async function imprimirThermal(pedido) {
   printer.println("Productos:");
   printer.bold(false);
 
-  const productos = (pedido.descricao || "").split(",");
+  const productos = (pedido.descricao || "").split("\n");
   for (const producto of productos) {
     const linea = producto.trim();
     if (linea) printer.println(linea);

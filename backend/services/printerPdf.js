@@ -49,7 +49,7 @@ export function imprimirPdf(pedido) {
 
       // Productos — cada uno en su propia línea
       doc.text("Productos:");
-      const productos = (pedido.descricao || "").split(",");
+      const productos = (pedido.descricao || "").split("\n");
       for (const producto of productos) {
         const linea = producto.trim();
         if (linea) doc.text(`  ${linea}`);
