@@ -157,3 +157,4 @@ Para encontrar el puerto correcto en Windows:
 | Preparando | En preparación en la cocina |
 | Listo | Listo para entregar |
 | Cancelado | Pedido cancelado |
+
